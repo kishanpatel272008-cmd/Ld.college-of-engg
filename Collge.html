@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College Record Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0b1728;
+  --ink: #162032;
+  --blue: #1565c0;
+  --sky: #2196f3;
+  --cyan: #00bcd4;
+  --gold: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --orange: #f97316;
+  --purple: #8b5cf6;
+  --white: #ffffff;
+  --cream: #f8fafc;
+  --border: #e2e8f0;
+  --muted: #64748b;
+  --light: #f1f5f9;
+  --card: #ffffff;
+  --sidebar-w: 250px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Epilogue',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;}
+button{cursor:pointer;font-family:'Epilogue',sans-serif;}
+input,select{font-family:'Epilogue',sans-serif;}
+
+/* ===== SCREENS ===== */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;}
+
+/* ===== LOGIN ===== */
+#loginScreen{
+  background: linear-gradient(135deg, #0b1728 0%, #0d2137 40%, #112240 100%);
+  align-items:center; justify-content:center; flex-direction:column;
+  position:relative; overflow:hidden;
+}
+#loginScreen::before{
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 60% 50% at 30% 40%, rgba(33,150,243,.12) 0%, transparent 60%),
+              radial-gradient(ellipse 50% 60% at 70% 60%, rgba(0,188,212,.08) 0%, transparent 60%);
+}
+.login-grid{
+  position:absolute; inset:0; opacity:.04;
+  background-image: linear-gradient(var(--sky) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--sky) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.login-box{
+  position:relative; z-index:2;
+  background: rgba(255,255,255,.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px;
+  padding: 48px 44px;
+  width: 420px;
+  box-shadow: 0 40px 80px rgba(0,0,0,.4);
+  animation: fadeUp .5s ease;
+}
+.login-logo{
+  text-align:center; margin-bottom:32px;
+}
+.login-logo .emblem{
+  width:64px;height:64px;border-radius:16px;
+  background:linear-gradient(135deg,var(--sky),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem; margin:0 auto 12px;
+  box-shadow: 0 8px 24px rgba(33,150,243,.4);
+}
+.login-logo h1{
+  font-family:'Syne',sans-serif; font-size:1.4rem; color:white;
+  font-weight:800; letter-spacing:-.02em;
+}
+.login-logo p{color:rgba(255,255,255,.4);font-size:.8rem;margin-top:4px;}
+
+.portal-tabs{
+  display:flex; background:rgba(255,255,255,.07); border-radius:10px;
+  padding:4px; gap:4px; margin-bottom:28px;
+}
+.ptab{
+  flex:1; padding:8px; border-radius:7px; border:none;
+  background:transparent; color:rgba(255,255,255,.5);
+  font-size:.78rem; font-weight:600; transition:all .2s;
+}
+.ptab.active{background:rgba(255,255,255,.15);color:white;}
+
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase;}
+.form-group input, .form-group select{
+  width:100%;padding:12px 14px;border-radius:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+  color:white;font-size:.88rem;outline:none;
+  transition:border-color .2s;
+}
+.form-group input::placeholder{color:rgba(255,255,255,.25);}
+.form-group input:focus,.form-group select:focus{border-color:var(--sky);}
+.form-group select option{background:var(--navy);color:white;}
+
+.login-btn{
+  width:100%;padding:13px;border-radius:10px;border:none;
+  background:linear-gradient(90deg,var(--blue),var(--sky));
+  color:white;font-size:.92rem;font-weight:700;
+  letter-spacing:.04em; margin-top:8px;
+  box-shadow:0 4px 16px rgba(33,150,243,.4);
+  transition:transform .15s, box-shadow .15s;
+}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(33,150,243,.5);}
+.login-hint{text-align:center;margin-top:16px;font-size:.75rem;color:rgba(255,255,255,.25);}
+
+/* ===== APP SHELL ===== */
+#appScreen{flex-direction:row;}
+
+.sidebar{
+  width:var(--sidebar-w); background:var(--navy);
+  min-height:100vh; display:flex;flex-direction:column;
+  position:fixed;left:0;top:0;bottom:0;z-index:200;
+  box-shadow:4px 0 20px rgba(0,0,0,.2);
+}
+.sb-brand{
+  padding:22px 20px 16px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.sb-brand .logo-row{display:flex;align-items:center;gap:10px;}
+.sb-brand .logo-icon{
+  width:36px;height:36px;border-radius:9px;
+  background:linear-gradient(135deg,var(--sky),var(--cyan));
+  display:flex;align-items:center;justify-content:center;font-size:1rem;
+  flex-shrink:0;
+}
+.sb-brand .logo-text{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:800;color:white;line-height:1.2;}
+.sb-brand .logo-sub{font-size:.65rem;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.06em;}
+
+.sb-user{
+  padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-avatar{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;
+  color:white;flex-shrink:0;
+}
+.sb-user-name{font-size:.83rem;font-weight:600;color:white;}
+.sb-user-role{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:2px;}
+
+.sb-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.sb-section{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:10px 20px 4px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 20px; cursor:pointer;
+  font-size:.82rem;color:rgba(255,255,255,.5);
+  border-left:3px solid transparent;transition:all .15s;
+}
+.nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);}
+.nav-item.active{background:rgba(33,150,243,.15);color:var(--sky);border-left-color:var(--sky);font-weight:600;}
+.nav-item .ni{font-size:.95rem;width:20px;text-align:center;}
+
+.sb-footer{
+  padding:14px 20px;border-top:1px solid rgba(255,255,255,.07);
+  font-size:.72rem;color:rgba(255,255,255,.2);
+}
+.logout-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 20px;cursor:pointer;
+  font-size:.82rem;color:rgba(255,255,255,.35);transition:color .15s;
+  margin-top:4px;
+}
+.logout-btn:hover{color:var(--red);}
+
+/* ===== MAIN CONTENT ===== */
+.main-area{
+  margin-left:var(--sidebar-w);flex:1;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+.topbar{
+  background:white;border-bottom:1px solid var(--border);
+  padding:0 28px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.tb-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--navy);}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-badge{
+  background:var(--navy);color:white;font-size:.7rem;font-weight:700;
+  padding:4px 12px;border-radius:20px;letter-spacing:.06em;
+}
+.tb-icon{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--light);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;cursor:pointer;position:relative;
+}
+.tb-dot{position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid white;}
+
+.page-content{padding:24px 28px;flex:1;}
+
+/* ===== VIEWS ===== */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ===== COMMON COMPONENTS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.anim{animation:fadeUp .35s ease both;}
+.anim1{animation-delay:.05s;}
+.anim2{animation-delay:.1s;}
+.anim3{animation-delay:.15s;}
+.anim4{animation-delay:.2s;}
+
+.page-header{margin-bottom:22px;}
+.page-header h2{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--navy);}
+.page-header p{color:var(--muted);font-size:.83rem;margin-top:3px;}
+
+.stats-grid{display:grid;gap:14px;margin-bottom:22px;}
+.stats-grid.cols4{grid-template-columns:repeat(4,1fr);}
+.stats-grid.cols3{grid-template-columns:repeat(3,1fr);}
+
+.stat-card{
+  background:white;border-radius:12px;padding:18px;
+  border:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,.04);
+  display:flex;align-items:center;gap:14px;
+  transition:transform .18s,box-shadow .18s;
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08);}
+.stat-icon{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.si-blue{background:#dbeafe;} .si-green{background:#d1fae5;} .si-gold{background:#fef3c7;} .si-red{background:#fee2e2;} .si-purple{background:#ede9fe;} .si-cyan{background:#cffafe;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:500;color:var(--navy);line-height:1;}
+.stat-lbl{font-size:.72rem;color:var(--muted);margin-top:4px;}
+
+.card{background:white;border-radius:12px;border:1px solid var(--border);box-shadow:0 2px 6px rgba(0,0,0,.04);overflow:hidden;margin-bottom:18px;}
+.card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;color:var(--navy);}
+.card-action{font-size:.75rem;color:var(--sky);cursor:pointer;font-weight:600;}
+.card-body{padding:18px 20px;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 0 10px;text-align:left;}
+.data-table td{padding:10px 0;border-bottom:1px solid var(--border);font-size:.82rem;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table td:first-child{font-weight:500;color:var(--navy);}
+
+/* PILLS */
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:700;}
+.pill-blue{background:#dbeafe;color:var(--blue);}
+.pill-green{background:#d1fae5;color:#059669;}
+.pill-gold{background:#fef3c7;color:#b45309;}
+.pill-red{background:#fee2e2;color:#dc2626;}
+.pill-purple{background:#ede9fe;color:#7c3aed;}
+.pill-gray{background:#f1f5f9;color:var(--muted);}
+.pill-cyan{background:#cffafe;color:#0e7490;}
+
+/* GRADE BADGE */
+.grade{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;}
+.g-O{background:#d1fae5;color:#059669;}
+.g-A{background:#dbeafe;color:var(--blue);}
+.g-B{background:#fef3c7;color:#b45309;}
+.g-C{background:#fee2e2;color:#dc2626;}
+.g-F{background:#1f2937;color:white;}
+
+/* PROGRESS BAR */
+.prog-wrap{display:flex;align-items:center;gap:8px;}
+.prog-bar{flex:1;height:7px;border-radius:4px;background:var(--light);overflow:hidden;}
+.prog-fill{height:100%;border-radius:4px;}
+.pf-green{background:linear-gradient(90deg,#10b981,#34d399);}
+.pf-blue{background:linear-gradient(90deg,var(--blue),var(--sky));}
+.pf-gold{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.pf-red{background:linear-gradient(90deg,#ef4444,#f87171);}
+.prog-val{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:500;min-width:38px;text-align:right;}
+
+/* WELCOME BANNER */
+.welcome-banner{
+  border-radius:14px;padding:24px 28px;margin-bottom:22px;
+  background:linear-gradient(120deg,var(--navy) 0%,#1e3a5f 60%,#1565c0 100%);
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;overflow:hidden;
+}
+.welcome-banner::before{content:'';position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04);}
+.welcome-banner::after{content:'';position:absolute;right:80px;bottom:-60px;width:130px;height:130px;border-radius:50%;background:rgba(33,150,243,.1);}
+.wb-text h2{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:white;}
+.wb-text p{color:rgba(255,255,255,.55);font-size:.83rem;margin-top:5px;}
+.wb-metric{
+  background:rgba(255,255,255,.1);backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.15);border-radius:12px;
+  padding:14px 22px;text-align:center;color:white;position:relative;z-index:1;
+}
+.wb-metric .val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:500;color:var(--gold);line-height:1;}
+.wb-metric .lbl{font-size:.68rem;color:rgba(255,255,255,.45);margin-top:4px;letter-spacing:.06em;}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.f-group{display:flex;flex-direction:column;gap:5px;}
+.f-group label{font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+.f-group input,.f-group select,.f-group textarea{
+  padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);
+  font-size:.85rem;outline:none;transition:border-color .2s;color:var(--ink);background:white;
+}
+.f-group input:focus,.f-group select:focus,.f-group textarea:focus{border-color:var(--sky);}
+.btn-primary{
+  padding:10px 22px;border-radius:8px;border:none;
+  background:linear-gradient(90deg,var(--blue),var(--sky));
+  color:white;font-size:.85rem;font-weight:700;
+  box-shadow:0 3px 10px rgba(33,150,243,.35);transition:transform .15s;
+}
+.btn-primary:hover{transform:translateY(-1px);}
+.btn-secondary{
+  padding:10px 22px;border-radius:8px;border:1.5px solid var(--border);
+  background:white;color:var(--ink);font-size:.85rem;font-weight:600;transition:border-color .2s;
+}
+.btn-secondary:hover{border-color:var(--sky);}
+.btn-danger{padding:6px 14px;border-radius:7px;border:none;background:#fee2e2;color:#dc2626;font-size:.75rem;font-weight:700;}
+.btn-success{padding:6px 14px;border-radius:7px;border:none;background:#d1fae5;color:#059669;font-size:.75rem;font-weight:700;}
+.btn-edit{padding:6px 14px;border-radius:7px;border:none;background:#dbeafe;color:var(--blue);font-size:.75rem;font-weight:700;}
+
+/* NOTICE ITEM */
+.notice-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.notice-item:last-child{border-bottom:none;}
+.n-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.n-title{font-size:.83rem;font-weight:600;color:var(--navy);}
+.n-meta{font-size:.7rem;color:var(--muted);margin-top:2px;}
+
+/* ATTENDANCE SUBJECT ROW */
+.att-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.att-sub{font-size:.82rem;font-weight:500;flex:0 0 80px;}
+.att-pct{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:500;width:40px;text-align:right;}
+
+/* TIMETABLE CELL */
+.tt-cell{
+  background:var(--light);border-radius:8px;padding:8px 10px;
+  font-size:.75rem;line-height:1.4;border-left:3px solid var(--sky);
+}
+.tt-cell.empty{background:none;border-left:none;color:var(--muted);}
+.tt-grid{display:grid;grid-template-columns:80px repeat(5,1fr);gap:6px;}
+.tt-header{font-size:.68rem;font-weight:700;color:var(--muted);text-align:center;padding:6px 0;}
+.tt-time{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);display:flex;align-items:center;}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:24px;}
+.timeline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:2px;background:var(--border);}
+.tl-item{position:relative;margin-bottom:18px;}
+.tl-dot{position:absolute;left:-20px;top:3px;width:12px;height:12px;border-radius:50%;border:2px solid white;flex-shrink:0;}
+.tl-title{font-size:.83rem;font-weight:600;color:var(--navy);}
+.tl-meta{font-size:.72rem;color:var(--muted);margin-top:2px;}
+.tl-body{font-size:.8rem;color:var(--ink);margin-top:4px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:16px;}
+.tab{padding:9px 16px;font-size:.82rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s;}
+.tab.active{color:var(--sky);border-bottom-color:var(--sky);}
+
+/* CHART BAR */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px;padding-top:10px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar-fill{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--sky),var(--blue));transition:height .5s ease;}
+.bar-lbl{font-size:.65rem;color:var(--muted);}
+.bar-val{font-size:.7rem;font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--navy);}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:16px;padding:28px;width:500px;max-width:95vw;box-shadow:0 30px 60px rgba(0,0,0,.3);animation:fadeUp .25s ease;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy);}
+.modal-close{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:white;font-size:1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--navy);color:white;padding:12px 20px;
+  border-radius:10px;font-size:.83rem;font-weight:500;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);
+  transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginScreen" class="screen active">
+  <div class="login-grid"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="emblem">🎓</div>
+      <h1>College Record Management</h1>
+      <p>State Technical University — Computer Engineering</p>
+    </div>
+    <div class="portal-tabs">
+      <button class="ptab active" onclick="setPortal('student',this)">Student</button>
+      <button class="ptab" onclick="setPortal('faculty',this)">Faculty</button>
+      <button class="ptab" onclick="setPortal('admin',this)">Admin</button>
+    </div>
+    <div class="form-group">
+      <label>Roll / Employee / Admin ID</label>
+      <input type="text" id="loginId" placeholder="e.g. CE2021042">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Login to Portal →</button>
+    <p class="login-hint">Demo: any ID + any password</p>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="appScreen" class="screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="logo-row">
+        <div class="logo-icon">🎓</div>
+        <div>
+          <div class="logo-text">STU CRM</div>
+          <div class="logo-sub">COMPUTER ENGINEERING</div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-user" id="sbUser"></div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+    <div>
+      <div class="logout-btn" onclick="doLogout()">⬅️ Logout</div>
+      <div class="sb-footer">Session 2024–25 · Sem VI</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-area">
+    <header class="topbar">
+      <div class="tb-title" id="tbTitle">Dashboard</div>
+      <div class="tb-right">
+        <div class="tb-badge" id="tbBadge">STUDENT</div>
+        <div class="tb-icon">🔔<span class="tb-dot"></span></div>
+        <div class="tb-icon" id="tbAvatar" style="font-size:.75rem;font-weight:700;"></div>
+      </div>
+    </header>
+
+    <div class="page-content" id="pageContent">
+      <!-- Views rendered here -->
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== STATE ==================== */
+let currentPortal = 'student';
+let currentUser = {};
+let currentView = '';
+
+const PORTALS = {
+  student: {
+    name: 'Rahul Sharma', role: 'Student', id: 'CE2021042',
+    color: '#2196f3', initials: 'RS',
+    badge: 'STUDENT',
+    nav: [
+      {sec:'Overview'},{icon:'🏠',label:'Dashboard',view:'sDash'},
+      {sec:'Academics'},{icon:'📅',label:'Timetable',view:'sTimetable'},
+      {icon:'📝',label:'Marks & Exams',view:'sMarks'},
+      {icon:'📊',label:'Attendance',view:'sAttendance'},
+      {icon:'🏆',label:'Results',view:'sResults'},
+      {sec:'Resources'},{icon:'📋',label:'Assignments',view:'sAssignments'},
+      {icon:'📁',label:'Study Material',view:'sMaterial'},
+      {icon:'💬',label:'Notices',view:'sNotices'},
+      {sec:'Profile'},{icon:'👤',label:'My Profile',view:'sProfile'},
+      {icon:'💰',label:'Fee Status',view:'sFee'},
+    ]
+  },
+  faculty: {
+    name: 'Dr. Anjali Patil', role: 'Asst. Professor', id: 'FAC2018011',
+    color: '#10b981', initials: 'AP',
+    badge: 'FACULTY',
+    nav: [
+      {sec:'Overview'},{icon:'🏠',label:'Dashboard',view:'fDash'},
+      {sec:'Teaching'},{icon:'📅',label:'My Timetable',view:'fTimetable'},
+      {icon:'📝',label:'Upload Marks',view:'fMarks'},
+      {icon:'📊',label:'Attendance',view:'fAttendance'},
+      {icon:'📋',label:'Assignments',view:'fAssignments'},
+      {sec:'Students'},{icon:'👥',label:'Student List',view:'fStudents'},
+      {icon:'📁',label:'Study Material',view:'fMaterial'},
+      {sec:'Communication'},{icon:'💬',label:'Notices',view:'fNotices'},
+      {sec:'Profile'},{icon:'👤',label:'My Profile',view:'fProfile'},
+    ]
+  },
+  admin: {
+    name: 'Mr. Vinod Kulkarni', role: 'Administrator', id: 'ADM2010001',
+    color: '#f59e0b', initials: 'VK',
+    badge: 'ADMIN',
+    nav: [
+      {sec:'Overview'},{icon:'🏠',label:'Dashboard',view:'aDash'},
+      {sec:'Management'},{icon:'👥',label:'Students',view:'aStudents'},
+      {icon:'🧑‍🏫',label:'Faculty',view:'aFaculty'},
+      {icon:'📚',label:'Subjects',view:'aSubjects'},
+      {icon:'🗓',label:'Timetable',view:'aTimetable'},
+      {sec:'Academics'},{icon:'📝',label:'Marks / Results',view:'aMarks'},
+      {icon:'📊',label:'Attendance Report',view:'aAttendance'},
+      {sec:'Administration'},{icon:'💰',label:'Fee Management',view:'aFee'},
+      {icon:'💬',label:'Notices',view:'aNotices'},
+      {icon:'📋',label:'Reports',view:'aReports'},
+    ]
+  }
+};
+
+/* ==================== DATA ==================== */
+const DATA = {
+  subjects: ['DBMS','Operating Systems','Computer Networks','Software Engg.','TOC','Compiler Design'],
+  students: [
+    {id:'CE2021001',name:'Aakash Mehta',sem:6,div:'Q',cgpa:8.1,att:85,fee:'Paid'},
+    {id:'CE2021042',name:'Rahul Sharma',sem:6,div:'Q',cgpa:8.42,att:82,fee:'Paid'},
+    {id:'CE2021078',name:'Priya Joshi',sem:6,div:'R',cgpa:9.1,att:91,fee:'Paid'},
+    {id:'CE2021023',name:'Sneha Kulkarni',sem:6,div:'Q',cgpa:7.8,att:74,fee:'Pending'},
+    {id:'CE2021055',name:'Rohit Desai',sem:6,div:'R',cgpa:6.5,att:61,fee:'Pending'},
+    {id:'CE2021099',name:'Neha Patil',sem:6,div:'Q',cgpa:8.9,att:88,fee:'Paid'},
+    {id:'CE2021034',name:'Amit Shah',sem:6,div:'R',cgpa:7.2,att:78,fee:'Paid'},
+    {id:'CE2021067',name:'Kavita More',sem:6,div:'Q',cgpa:9.4,att:95,fee:'Paid'},
+  ],
+  faculty: [
+    {id:'FAC2018011',name:'Dr. Anjali Patil',dept:'CE',subject:'DBMS',exp:'8 yrs',status:'Active'},
+    {id:'FAC2015003',name:'Prof. Raj Desai',dept:'CE',subject:'OS',exp:'12 yrs',status:'Active'},
+    {id:'FAC2019007',name:'Dr. Priti More',dept:'CE',subject:'CN',exp:'6 yrs',status:'Active'},
+    {id:'FAC2012001',name:'Dr. Priya Sharma',dept:'CE',subject:'SE',exp:'14 yrs',status:'Active'},
+    {id:'FAC2020015',name:'Prof. Sanjay Naik',dept:'CE',subject:'TOC',exp:'5 yrs',status:'Active'},
+    {id:'FAC2017009',name:'Dr. Meena Joshi',dept:'CE',subject:'Compiler Design',exp:'9 yrs',status:'Active'},
+  ],
+  marks: [
+    {sub:'DBMS',ut1:26,ut2:28,prac:24,total:78,grade:'O'},
+    {sub:'Operating Systems',ut1:22,ut2:24,prac:22,total:68,grade:'A'},
+    {sub:'Computer Networks',ut1:25,ut2:27,prac:23,total:75,grade:'O'},
+    {sub:'Software Engg.',ut1:20,ut2:22,prac:21,total:63,grade:'A'},
+    {sub:'TOC',ut1:18,ut2:20,prac:19,total:57,grade:'B'},
+    {sub:'Compiler Design',ut1:24,ut2:25,prac:22,total:71,grade:'A'},
+  ],
+  attendance: [
+    {sub:'DBMS',held:48,attended:44,pct:92},
+    {sub:'Operating Systems',held:46,attended:38,pct:83},
+    {sub:'Computer Networks',held:44,attended:40,pct:91},
+    {sub:'Software Engg.',held:42,attended:31,pct:74},
+    {sub:'TOC',held:40,attended:24,pct:60},
+    {sub:'Compiler Design',held:38,attended:33,pct:87},
+  ],
+  notices: [
+    {title:'Internal Exam Schedule – Sem VI',from:'Exam Cell',date:'Apr 25, 2025',type:'red',body:'Unit Tests for Sem VI will be held from May 5–12, 2025. Detailed schedule posted on notice board.'},
+    {title:'Project Submission Deadline Extended',from:'HOD Office',date:'Apr 24, 2025',type:'orange',body:'Final year project submission extended to May 15, 2025. No further extensions will be granted.'},
+    {title:'Workshop: Ethical AI & ML – May 5',from:'CSI Club',date:'Apr 22, 2025',type:'blue',body:'One-day workshop on Ethical AI and Machine Learning. Registration at CSI office.'},
+    {title:'Sports Day Registration Open',from:'Physical Dept',date:'Apr 20, 2025',type:'green',body:'Annual Sports Day on May 20. Register for your events at the Physical Education office.'},
+    {title:'Library Fine Waiver – Last Date Apr 30',from:'Library',date:'Apr 18, 2025',type:'gray',body:'All pending library fines waived if books returned before April 30, 2025.'},
+  ],
+  assignments: [
+    {sub:'DBMS',title:'ER Diagram – Hospital DB',due:'Apr 30, 2025',status:'Pending',marks:'20'},
+    {sub:'CN',title:'Subnetting Practice Set',due:'May 2, 2025',status:'Pending',marks:'15'},
+    {sub:'SE',title:'SRS Document – Any System',due:'Apr 28, 2025',status:'Submitted',marks:'25'},
+    {sub:'OS',title:'Scheduling Algorithm Simulation',due:'May 5, 2025',status:'Pending',marks:'20'},
+    {sub:'Compiler',title:'Lexical Analyzer in C',due:'May 8, 2025',status:'Pending',marks:'30'},
+  ],
+  timetable: {
+    Mon:['DBMS (LH201)','OS (LH202)','—','CN Lab (Lab3)','SE (LH201)'],
+    Tue:['OS (LH202)','TOC (LH201)','—','DBMS Lab (Lab2)','—'],
+    Wed:['CN (LH203)','SE (LH204)','—','Compiler (LH201)','OS (LH202)'],
+    Thu:['TOC (LH201)','CN (LH203)','—','SE Lab (Lab1)','DBMS (LH201)'],
+    Fri:['Compiler (LH201)','OS (LH202)','—','TOC (LH201)','CN (LH203)'],
+  }
+};
+
+/* ==================== LOGIN ==================== */
+function setPortal(p, btn) {
+  currentPortal = p;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function doLogin() {
+  const id = document.getElementById('loginId').value.trim() || 'DEMO001';
+  currentUser = {...PORTALS[currentPortal], id};
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+  buildSidebar();
+  const firstView = PORTALS[currentPortal].nav.find(n=>n.view);
+  loadView(firstView.view);
+}
+function doLogout(){
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+}
+
+/* ==================== SIDEBAR ==================== */
+function buildSidebar(){
+  const p = PORTALS[currentPortal];
+  // user
+  document.getElementById('sbUser').innerHTML=`
+    <div class="sb-avatar" style="background:${p.color}">${p.initials}</div>
+    <div><div class="sb-user-name">${p.name}</div><div class="sb-user-role">${p.role} · ${p.id}</div></div>`;
+  document.getElementById('tbBadge').textContent = p.badge;
+  document.getElementById('tbAvatar').textContent = p.initials;
+  // nav
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = p.nav.map(n=> n.sec
+    ? `<div class="sb-section">${n.sec}</div>`
+    : `<div class="nav-item" id="nav-${n.view}" onclick="loadView('${n.view}')"><span class="ni">${n.icon}</span>${n.label}</div>`
+  ).join('');
+}
+
+function loadView(view){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el = document.getElementById('nav-'+view);
+  if(el) el.classList.add('active');
+  currentView = view;
+  const label = PORTALS[currentPortal].nav.find(n=>n.view===view)?.label||'';
+  document.getElementById('tbTitle').textContent = label;
+  document.getElementById('pageContent').innerHTML = getView(view);
+  // animate bars after render
+  setTimeout(()=>{
+    document.querySelectorAll('.prog-fill').forEach(b=>{ const w=b.getAttribute('data-w'); if(w) b.style.width=w+'%'; });
+    document.querySelectorAll('.bar-fill').forEach(b=>{ const h=b.getAttribute('data-h'); if(h) b.style.height=h+'px'; });
+  },100);
+}
+
+/* ==================== VIEWS ==================== */
+function getView(view){
+  const v = {
+    // STUDENT
+    sDash: studentDash,
+    sTimetable: studentTimetable,
+    sMarks: studentMarks,
+    sAttendance: studentAttendance,
+    sResults: studentResults,
+    sAssignments: studentAssignments,
+    sMaterial: studentMaterial,
+    sNotices: noticesView,
+    sProfile: studentProfile,
+    sFee: studentFee,
+    // FACULTY
+    fDash: facultyDash,
+    fTimetable: facultyTimetable,
+    fMarks: facultyMarks,
+    fAttendance: facultyAttendance,
+    fAssignments: facultyAssignments,
+    fStudents: facultyStudents,
+    fMaterial: facultyMaterial,
+    fNotices: noticesView,
+    fProfile: facultyProfile,
+    // ADMIN
+    aDash: adminDash,
+    aStudents: adminStudents,
+    aFaculty: adminFaculty,
+    aSubjects: adminSubjects,
+    aTimetable: adminTimetable,
+    aMarks: adminMarks,
+    aAttendance: adminAttendance,
+    aFee: adminFee,
+    aNotices: adminNotices,
+    aReports: adminReports,
+  };
+  return (v[view] || (()=>'<p>View not found</p>'))();
+}
+
+/* ===================== STUDENT VIEWS ===================== */
+function studentDash(){
+  return `
+  <div class="welcome-banner anim">
+    <div class="wb-text"><h2>Good morning, Rahul 👋</h2><p>You have 2 pending notices and 3 assignments due soon.</p></div>
+    <div class="wb-metric"><div class="val">8.42</div><div class="lbl">CURRENT CGPA</div></div>
+  </div>
+  <div class="stats-grid cols4 anim anim1">
+    ${stat('📅','6','Subjects','si-blue')}${stat('✅','82%','Avg Attendance','si-green')}${stat('📝','3','Pending Assignments','si-gold')}${stat('⚠️','1','Attendance Warning','si-red')}
+  </div>
+  <div class="grid2 anim anim2">
+    <div class="card"><div class="card-head"><div class="card-title">📅 Today's Classes</div><div class="card-action" onclick="loadView('sTimetable')">Full Schedule</div></div>
+      <div class="card-body">
+        ${ttRow('09:00–10:00','DBMS','LH-201','pill-blue')}
+        ${ttRow('10:00–11:00','Operating Systems','LH-202','pill-green')}
+        ${ttRow('11:15–12:15','CN Lab','Lab-3','pill-gold')}
+        ${ttRow('02:00–03:00','Software Engg.','LH-204','pill-purple')}
+        ${ttRow('03:00–04:00','TOC','LH-201','pill-cyan')}
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><div class="card-title">📢 Latest Notices</div><div class="card-action" onclick="loadView('sNotices')">View All</div></div>
+      <div class="card-body" style="padding:10px 20px">
+        ${DATA.notices.slice(0,4).map(n=>`<div class="notice-item"><div class="n-dot" style="background:${{red:'#ef4444',orange:'#f97316',blue:'#2196f3',green:'#10b981',gray:'#94a3b8'}[n.type]}"></div><div><div class="n-title">${n.title}</div><div class="n-meta">${n.from} · ${n.date}</div></div></div>`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="grid2 anim anim3">
+    <div class="card"><div class="card-head"><div class="card-title">📊 Attendance Overview</div><div class="card-action" onclick="loadView('sAttendance')">Details</div></div>
+      <div class="card-body">
+        ${DATA.attendance.map(a=>attRow(a.sub,a.pct)).join('')}
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><div class="card-title">📝 Recent Marks</div><div class="card-action" onclick="loadView('sMarks')">Full View</div></div>
+      <div class="card-body">
+        <table class="data-table">
+          <thead><tr><th>Subject</th><th>UT1</th><th>UT2</th><th>Total</th><th>Grade</th></tr></thead>
+          <tbody>${DATA.marks.map(m=>`<tr><td>${m.sub}</td><td>${m.ut1}</td><td>${m.ut2}</td><td><b>${m.total}</b></td><td><span class="grade g-${m.grade}">${m.grade}</span></td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function studentTimetable(){
+  const days = Object.keys(DATA.timetable);
+  const times = ['09:00–10:00','10:00–11:00','11:00–12:00','02:00–03:00','03:00–04:00'];
+  return `
+  <div class="page-header anim"><h2>📅 Weekly Timetable</h2><p>Semester VI — Division Q</p></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Class Schedule</div><div class="card-action">Sem VI · Q</div></div>
+    <div class="card-body">
+      <div class="tt-grid">
+        <div></div>${days.map(d=>`<div class="tt-header" style="font-weight:800;color:var(--navy)">${d}</div>`).join('')}
+        ${times.map((t,i)=>`
+          <div class="tt-time">${t}</div>
+          ${days.map(d=>`<div class="tt-cell ${DATA.timetable[d][i]==='—'?'empty':''}">${DATA.timetable[d][i]}</div>`).join('')}
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function studentMarks(){
+  return `
+  <div class="page-header anim"><h2>📝 Marks & Examinations</h2><p>Semester VI internal assessment</p></div>
+  <div class="stats-grid cols3 anim anim1">
+    ${stat('🏅','27.3','Avg UT Marks /30','si-blue')}${stat('📊','8.42','Current SGPA','si-gold')}${stat('✅','5/6','Subjects Cleared','si-green')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Internal Assessment Marks</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>UT-1 /30</th><th>UT-2 /30</th><th>Practical /25</th><th>Total /100</th><th>Grade</th><th>Status</th></tr></thead>
+        <tbody>${DATA.marks.map(m=>`<tr>
+          <td>${m.sub}</td><td>${m.ut1}</td><td>${m.ut2}</td><td>${m.prac}</td>
+          <td><b>${m.total}</b></td>
+          <td><span class="grade g-${m.grade}">${m.grade}</span></td>
+          <td><span class="pill ${m.total>=40?'pill-green':'pill-red'}">${m.total>=40?'Pass':'Fail'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card anim anim3">
+    <div class="card-head"><div class="card-title">📊 Performance Chart</div></div>
+    <div class="card-body">
+      <div class="bar-chart">
+        ${DATA.marks.map(m=>`<div class="bar-col">
+          <div class="bar-val">${m.total}</div>
+          <div class="bar-fill" data-h="${m.total*0.7}" style="height:0"></div>
+          <div class="bar-lbl">${m.sub.split(' ')[0]}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function studentAttendance(){
+  const warn = DATA.attendance.filter(a=>a.pct<75);
+  return `
+  <div class="page-header anim"><h2>📊 Attendance</h2><p>Current semester attendance records</p></div>
+  ${warn.length?`<div class="card anim" style="border:1.5px solid #fca5a5;background:#fff7f7"><div class="card-body"><p style="color:#dc2626;font-weight:600;font-size:.85rem">⚠️ Warning: ${warn.map(w=>w.sub).join(', ')} — below 75% threshold. May be detained from exams.</p></div></div>`:''}
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Subject-wise Attendance</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>Classes Held</th><th>Attended</th><th>Percentage</th><th>Status</th></tr></thead>
+        <tbody>${DATA.attendance.map(a=>`<tr>
+          <td>${a.sub}</td><td>${a.held}</td><td>${a.attended}</td>
+          <td>
+            <div class="prog-wrap">
+              <div class="prog-bar"><div class="prog-fill ${a.pct>=75?'pf-green':'pf-red'}" data-w="${a.pct}" style="width:0"></div></div>
+              <div class="prog-val">${a.pct}%</div>
+            </div>
+          </td>
+          <td><span class="pill ${a.pct>=75?'pill-green':'pill-red'}">${a.pct>=75?'OK':'⚠️ Low'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function studentResults(){
+  const sgpa = 8.42;
+  return `
+  <div class="page-header anim"><h2>🏆 Results</h2><p>Semester-wise academic results</p></div>
+  <div class="stats-grid cols3 anim anim1">
+    ${stat('📈','8.42','SGPA – Sem VI','si-blue')}${stat('🎓','8.21','CGPA Overall','si-gold')}${stat('🏅','2nd','Class Rank','si-purple')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Semester VI Result</div><div class="card-action">Download Marksheet</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>Theory /100</th><th>Practical /25</th><th>Total</th><th>Grade</th><th>Credits</th><th>Grade Points</th></tr></thead>
+        <tbody>
+          ${DATA.marks.map((m,i)=>`<tr><td>${m.sub}</td><td>${m.ut1+m.ut2+30}</td><td>${m.prac}</td><td><b>${m.total}</b></td><td><span class="grade g-${m.grade}">${m.grade}</span></td><td>4</td><td>${{O:10,A:9,B:8,C:7,F:0}[m.grade]}</td></tr>`).join('')}
+        </tbody>
+        <tfoot><tr style="font-weight:700;color:var(--navy)"><td colspan="5">SGPA</td><td>24</td><td>${sgpa}</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="card anim anim3">
+    <div class="card-head"><div class="card-title">CGPA Progression</div></div>
+    <div class="card-body">
+      <div class="bar-chart">
+        ${[{s:'Sem I',v:7.2},{s:'Sem II',v:7.6},{s:'Sem III',v:7.9},{s:'Sem IV',v:8.1},{s:'Sem V',v:8.3},{s:'Sem VI',v:8.42}].map(x=>`
+          <div class="bar-col">
+            <div class="bar-val">${x.v}</div>
+            <div class="bar-fill" data-h="${(x.v-6)*40}" style="height:0"></div>
+            <div class="bar-lbl">${x.s}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function studentAssignments(){
+  return `
+  <div class="page-header anim"><h2>📋 Assignments</h2><p>Track your pending and submitted work</p></div>
+  <div class="stats-grid cols3 anim anim1">
+    ${stat('⏳','3','Pending','si-red')}${stat('✅','1','Submitted','si-green')}${stat('📅','Apr 28','Next Due','si-gold')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">All Assignments</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>Title</th><th>Due Date</th><th>Marks</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>${DATA.assignments.map(a=>`<tr>
+          <td><span class="pill pill-blue">${a.sub}</span></td>
+          <td>${a.title}</td><td>${a.due}</td><td>${a.marks}</td>
+          <td><span class="pill ${a.status==='Submitted'?'pill-green':'pill-gold'}">${a.status}</span></td>
+          <td>${a.status==='Pending'?`<button class="btn-primary" onclick="toast('Assignment submitted!')">Submit</button>`:`<button class="btn-success">View</button>`}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function studentMaterial(){
+  const mats = [
+    {sub:'DBMS',title:'Unit 1 – ER Model Notes',type:'PDF',size:'1.2 MB',date:'Apr 20'},
+    {sub:'OS',title:'Process Scheduling Slides',type:'PPT',size:'3.4 MB',date:'Apr 18'},
+    {sub:'CN',title:'TCP/IP Reference Sheet',type:'PDF',size:'0.8 MB',date:'Apr 15'},
+    {sub:'SE',title:'UML Diagrams Practice',type:'DOC',size:'1.5 MB',date:'Apr 12'},
+    {sub:'TOC',title:'Automata Theory Formulas',type:'PDF',size:'0.5 MB',date:'Apr 10'},
+    {sub:'Compiler',title:'Lexer & Parser Tutorial',type:'PDF',size:'2.1 MB',date:'Apr 8'},
+  ];
+  return `
+  <div class="page-header anim"><h2>📁 Study Material</h2><p>Faculty-uploaded notes and resources</p></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Available Resources</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>Title</th><th>Type</th><th>Size</th><th>Uploaded</th><th>Action</th></tr></thead>
+        <tbody>${mats.map(m=>`<tr>
+          <td><span class="pill pill-blue">${m.sub}</span></td>
+          <td>${m.title}</td>
+          <td><span class="pill ${m.type==='PDF'?'pill-red':m.type==='PPT'?'pill-orange':'pill-blue'}">${m.type}</span></td>
+          <td style="color:var(--muted)">${m.size}</td><td style="color:var(--muted)">${m.date}</td>
+          <td><button class="btn-edit" onclick="toast('Downloading...')">⬇ Download</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function noticesView(){
+  return `
+  <div class="page-header anim"><h2>💬 Notices</h2><p>Official college announcements</p></div>
+  <div class="card anim anim1">
+    ${DATA.notices.map((n,i)=>`
+      <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;gap:16px;align-items:flex-start;cursor:pointer" onclick="showNotice(${i})">
+        <div style="width:10px;height:10px;border-radius:50%;margin-top:5px;flex-shrink:0;background:${{red:'#ef4444',orange:'#f97316',blue:'#2196f3',green:'#10b981',gray:'#94a3b8'}[n.type]}"></div>
+        <div style="flex:1">
+          <div style="font-size:.88rem;font-weight:600;color:var(--navy)">${n.title}</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:3px">${n.from} · ${n.date}</div>
+        </div>
+        <span class="pill pill-${n.type==='red'?'red':n.type==='orange'?'gold':n.type==='blue'?'blue':n.type==='green'?'green':'gray'}">View →</span>
+      </div>`).join('')}
+  </div>`;
+}
+
+function studentProfile(){
+  return `
+  <div class="page-header anim"><h2>👤 My Profile</h2></div>
+  <div class="grid2 anim anim1">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Personal Information</div><div class="card-action" onclick="toast('Edit mode enabled')">Edit</div></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--blue));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:white">RS</div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy)">Rahul Sharma</div><div style="font-size:.78rem;color:var(--muted)">CE2021042 · Semester VI</div></div>
+        </div>
+        ${profileRow('Email','rahul.sharma@stu.edu')}
+        ${profileRow('Phone','+91 98765 43210')}
+        ${profileRow('DOB','March 15, 2002')}
+        ${profileRow('Blood Group','B+')}
+        ${profileRow('Address','Flat 4, Shiv Nagar, Pune - 411001')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Academic Details</div></div>
+      <div class="card-body">
+        ${profileRow('Department','Computer Engineering')}
+        ${profileRow('Division','Q')}
+        ${profileRow('Semester','VI (2024–25)')}
+        ${profileRow('Admission Year','2021')}
+        ${profileRow('CGPA','8.42')}
+        ${profileRow('Category','General')}
+        ${profileRow('Guardian','Mr. Suresh Sharma')}
+        ${profileRow('Guardian Phone','+91 98765 11111')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function studentFee(){
+  return `
+  <div class="page-header anim"><h2>💰 Fee Status</h2></div>
+  <div class="stats-grid cols3 anim anim1">
+    ${stat('✅','₹42,000','Total Paid','si-green')}${stat('⏳','₹0','Pending','si-gold')}${stat('📄','3','Receipts','si-blue')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Payment History</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Receipt No.</th><th>Description</th><th>Amount</th><th>Date</th><th>Mode</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>RCP2024001</td><td>Tuition Fee – Sem VI</td><td>₹28,000</td><td>Jan 10, 2025</td><td>Online</td><td><span class="pill pill-green">Paid</span></td></tr>
+          <tr><td>RCP2024002</td><td>Exam Fee – Sem VI</td><td>₹8,000</td><td>Feb 5, 2025</td><td>DD</td><td><span class="pill pill-green">Paid</span></td></tr>
+          <tr><td>RCP2024003</td><td>Library & Lab Fee</td><td>₹6,000</td><td>Jan 10, 2025</td><td>Online</td><td><span class="pill pill-green">Paid</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+/* ===================== FACULTY VIEWS ===================== */
+function facultyDash(){
+  return `
+  <div class="welcome-banner anim">
+    <div class="wb-text"><h2>Good morning, Dr. Patil 🌿</h2><p>You have 3 lectures today and 2 assignments to review.</p></div>
+    <div class="wb-metric"><div class="val">4</div><div class="lbl">SUBJECTS ASSIGNED</div></div>
+  </div>
+  <div class="stats-grid cols4 anim anim1">
+    ${stat('👥','48','Total Students','si-blue')}${stat('📅','4','Lectures Today','si-green')}${stat('📝','12','Assignments Pending Review','si-gold')}${stat('📊','84%','Avg Class Attendance','si-cyan')}
+  </div>
+  <div class="grid2 anim anim2">
+    <div class="card"><div class="card-head"><div class="card-title">📅 Today's Schedule</div></div>
+      <div class="card-body">
+        ${ttRow('09:00–10:00','DBMS – CE Sem VI Q','LH-201','pill-blue')}
+        ${ttRow('10:00–11:00','DBMS Lab – CE Sem VI R','Lab-2','pill-green')}
+        ${ttRow('02:00–03:00','DBMS – CE Sem VI R','LH-203','pill-blue')}
+        ${ttRow('03:00–04:00','HOD Meeting','Staff Room','pill-purple')}
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><div class="card-title">📊 Class Attendance Summary</div></div>
+      <div class="card-body">
+        ${[{c:'CE Sem VI – Q',p:86},{c:'CE Sem VI – R',p:79},{c:'CE Sem V – Q',p:91},{c:'CE Sem V – R',p:74}].map(x=>attRow(x.c,x.p)).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="card anim anim3"><div class="card-head"><div class="card-title">👥 Recent Student Activity</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Student</th><th>Roll No</th><th>Action</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr><td>Rahul Sharma</td><td>CE2021042</td><td><span class="pill pill-green">Assignment Submitted</span></td><td>Apr 25</td></tr>
+          <tr><td>Priya Joshi</td><td>CE2021078</td><td><span class="pill pill-blue">Material Downloaded</span></td><td>Apr 24</td></tr>
+          <tr><td>Sneha Kulkarni</td><td>CE2021023</td><td><span class="pill pill-red">Attendance Warning</span></td><td>Apr 23</td></tr>
+          <tr><td>Rohit Desai</td><td>CE2021055</td><td><span class="pill pill-gold">Marks Query</span></td><td>Apr 22</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function facultyTimetable(){
+  return `
+  <div class="page-header anim"><h2>📅 My Timetable</h2><p>Weekly teaching schedule</p></div>
+  <div class="card anim anim1">
+    <div class="card-body">
+      <div class="tt-grid">
+        <div></div>${['Mon','Tue','Wed','Thu','Fri'].map(d=>`<div class="tt-header" style="font-weight:800;color:var(--navy)">${d}</div>`).join('')}
+        ${['09–10','10–11','11–12','02–03','03–04'].map((t,i)=>`
+          <div class="tt-time">${t}</div>
+          ${['DBMS Q (LH201)','DBMS Lab R (Lab2)','—','DBMS R (LH203)','Staff Mtg'].map(c=>`<div class="tt-cell ${c==='—'?'empty':''}">${c}</div>`).join('')}
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function facultyMarks(){
+  return `
+  <div class="page-header anim"><h2>📝 Upload / Edit Marks</h2><p>Enter student examination marks</p></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Enter Marks</div></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="f-group"><label>Subject</label><select><option>DBMS</option><option>Operating Systems</option></select></div>
+        <div class="f-group"><label>Exam Type</label><select><option>Unit Test 1</option><option>Unit Test 2</option><option>Practical</option></select></div>
+      </div>
+      <table class="data-table" style="margin-top:8px">
+        <thead><tr><th>Roll No</th><th>Student Name</th><th>Marks /30</th><th>Action</th></tr></thead>
+        <tbody>${DATA.students.slice(0,5).map(s=>`<tr>
+          <td>${s.id}</td><td>${s.name}</td>
+          <td><input type="number" style="width:70px;padding:5px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem" min="0" max="30" placeholder="—"></td>
+          <td><button class="btn-success" onclick="toast('Marks saved for ${s.name}')">Save</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <button class="btn-primary" onclick="toast('All marks saved successfully!')">Save All Marks</button>
+        <button class="btn-secondary">Export Excel</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function facultyAttendance(){
+  return `
+  <div class="page-header anim"><h2>📊 Mark Attendance</h2></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Today's Attendance – DBMS Q</div><div class="card-action">Apr 27, 2025</div></div>
+    <div class="card-body">
+      <div class="form-row" style="margin-bottom:16px">
+        <div class="f-group"><label>Subject</label><select><option>DBMS</option></select></div>
+        <div class="f-group"><label>Date</label><input type="date" value="2025-04-27"></div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Roll No</th><th>Student</th><th>Attendance</th></tr></thead>
+        <tbody>${DATA.students.map(s=>`<tr>
+          <td>${s.id}</td><td>${s.name}</td>
+          <td>
+            <label style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:.82rem;cursor:pointer">
+              <input type="radio" name="att-${s.id}" value="P" checked> Present
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;cursor:pointer">
+              <input type="radio" name="att-${s.id}" value="A"> Absent
+            </label>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+      <div style="margin-top:16px"><button class="btn-primary" onclick="toast('Attendance saved successfully!')">Submit Attendance</button></div>
+    </div>
+  </div>`;
+}
+
+function facultyAssignments(){
+  return `
+  <div class="page-header anim"><h2>📋 Assignments</h2><p>Create and manage student assignments</p></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Create New Assignment</div></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="f-group"><label>Subject</label><select><option>DBMS</option><option>OS</option></select></div>
+        <div class="f-group"><label>Due Date</label><input type="date"></div>
+      </div>
+      <div class="f-group" style="margin-bottom:12px"><label>Title</label><input type="text" placeholder="Assignment title"></div>
+      <div class="f-group" style="margin-bottom:16px"><label>Description</label><textarea rows="3" placeholder="Describe the assignment..."></textarea></div>
+      <div class="form-row">
+        <div class="f-group"><label>Max Marks</label><input type="number" placeholder="e.g. 20"></div>
+        <div class="f-group"><label>Assign To</label><select><option>CE Sem VI – Q</option><option>CE Sem VI – R</option></select></div>
+      </div>
+      <button class="btn-primary" onclick="toast('Assignment created!')">Create Assignment</button>
+    </div>
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Active Assignments</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>Title</th><th>Due</th><th>Submitted</th><th>Pending</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td>DBMS</td><td>ER Diagram – Hospital DB</td><td>Apr 30</td><td>18</td><td>30</td><td><button class="btn-edit">View</button></td></tr>
+          <tr><td>CN</td><td>Subnetting Practice</td><td>May 2</td><td>22</td><td>26</td><td><button class="btn-edit">View</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function facultyStudents(){
+  return `
+  <div class="page-header anim"><h2>👥 Student List</h2><p>Students in your assigned classes</p></div>
+  <div class="card anim anim1">
+    <div class="card-head">
+      <div class="card-title">CE Sem VI – Division Q & R</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.8rem;outline:none">
+        <button class="btn-secondary" onclick="toast('Exported!')">Export</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Roll No</th><th>Name</th><th>Sem</th><th>Div</th><th>CGPA</th><th>Attendance</th><th>Fee</th><th>Action</th></tr></thead>
+        <tbody>${DATA.students.map(s=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${s.id}</td>
+          <td>${s.name}</td><td>${s.sem}</td><td>${s.div}</td>
+          <td><b>${s.cgpa}</b></td>
+          <td><span class="pill ${s.att>=75?'pill-green':'pill-red'}">${s.att}%</span></td>
+          <td><span class="pill ${s.fee==='Paid'?'pill-green':'pill-gold'}">${s.fee}</span></td>
+          <td><button class="btn-edit" onclick="toast('Viewing ${s.name}')">View</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function facultyMaterial(){
+  return `
+  <div class="page-header anim"><h2>📁 Study Material</h2><p>Upload resources for students</p></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Upload New Material</div></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="f-group"><label>Subject</label><select><option>DBMS</option><option>OS</option><option>CN</option></select></div>
+        <div class="f-group"><label>Title</label><input type="text" placeholder="Material title"></div>
+      </div>
+      <div class="form-row">
+        <div class="f-group"><label>File</label><input type="file"></div>
+        <div class="f-group"><label>Visible To</label><select><option>All Students</option><option>CE Sem VI Q</option><option>CE Sem VI R</option></select></div>
+      </div>
+      <button class="btn-primary" onclick="toast('Material uploaded!')">Upload</button>
+    </div>
+  </div>`;
+}
+
+function facultyProfile(){
+  return `
+  <div class="page-header anim"><h2>👤 My Profile</h2></div>
+  <div class="grid2 anim anim1">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Personal Information</div></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--green),#34d399);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:white">AP</div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy)">Dr. Anjali Patil</div><div style="font-size:.78rem;color:var(--muted)">FAC2018011 · Asst. Professor</div></div>
+        </div>
+        ${profileRow('Email','anjali.patil@stu.edu')}${profileRow('Phone','+91 99887 76655')}${profileRow('Qualification','Ph.D. – Computer Science')}${profileRow('Experience','8 Years')}${profileRow('Specialization','Database Systems, Data Mining')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Teaching Details</div></div>
+      <div class="card-body">
+        ${profileRow('Department','Computer Engineering')}${profileRow('Subjects','DBMS, Data Mining')}${profileRow('Designation','Assistant Professor')}${profileRow('Joining Date','August 1, 2018')}${profileRow('Employee ID','FAC2018011')}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ===================== ADMIN VIEWS ===================== */
+function adminDash(){
+  return `
+  <div class="welcome-banner anim">
+    <div class="wb-text"><h2>Admin Dashboard 🛠️</h2><p>Full system overview — Session 2024–25</p></div>
+    <div class="wb-metric"><div class="val">96%</div><div class="lbl">SYSTEM UPTIME</div></div>
+  </div>
+  <div class="stats-grid cols4 anim anim1">
+    ${stat('👥','240','Total Students','si-blue')}${stat('🧑‍🏫','24','Faculty Members','si-green')}${stat('📚','12','Subjects','si-gold')}${stat('💰','₹8.4L','Fee Collected','si-purple')}
+  </div>
+  <div class="grid2 anim anim2">
+    <div class="card"><div class="card-head"><div class="card-title">📊 Department Overview</div></div>
+      <div class="card-body">
+        <table class="data-table">
+          <thead><tr><th>Division</th><th>Students</th><th>Avg CGPA</th><th>Avg Att.</th></tr></thead>
+          <tbody>
+            <tr><td>CE Sem VI Q</td><td>60</td><td>7.9</td><td><span class="pill pill-green">83%</span></td></tr>
+            <tr><td>CE Sem VI R</td><td>60</td><td>7.7</td><td><span class="pill pill-green">81%</span></td></tr>
+            <tr><td>CE Sem V Q</td><td>62</td><td>7.5</td><td><span class="pill pill-gold">76%</span></td></tr>
+            <tr><td>CE Sem V R</td><td>58</td><td>7.4</td><td><span class="pill pill-red">71%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><div class="card-title">💰 Fee Collection</div></div>
+      <div class="card-body">
+        ${[{s:'CE Sem VI',p:88},{s:'CE Sem V',p:79},{s:'CE Sem IV',p:95},{s:'CE Sem III',p:91}].map(x=>attRow(x.s,x.p,'pf-blue')).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="card anim anim3"><div class="card-head"><div class="card-title">⚡ Recent System Activity</div></div>
+    <div class="card-body">
+      <div class="timeline">
+        ${[
+          {t:'Marks Uploaded – DBMS Sem VI',m:'Dr. Anjali Patil · 2h ago',c:'#2196f3'},
+          {t:'New Student Registered – CE2025001',m:'Admin · 4h ago',c:'#10b981'},
+          {t:'Notice Published – Exam Schedule',m:'Exam Cell · 6h ago',c:'#ef4444'},
+          {t:'Fee Payment – 8 students',m:'Accounts · Yesterday',c:'#f59e0b'},
+          {t:'Timetable Updated – CE Sem VI',m:'Admin · 2 days ago',c:'#8b5cf6'},
+        ].map(x=>`<div class="tl-item"><div class="tl-dot" style="background:${x.c}"></div><div class="tl-title">${x.t}</div><div class="tl-meta">${x.m}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function adminStudents(){
+  return `
+  <div class="page-header anim"><h2>👥 Student Management</h2></div>
+  <div class="card anim anim1">
+    <div class="card-head">
+      <div class="card-title">All Students</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="openAddStudentModal()">+ Add Student</button>
+        <button class="btn-secondary">Export</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Roll No</th><th>Name</th><th>Sem</th><th>Div</th><th>CGPA</th><th>Attendance</th><th>Fee</th><th>Actions</th></tr></thead>
+        <tbody>${DATA.students.map(s=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${s.id}</td>
+          <td>${s.name}</td><td>${s.sem}</td><td>${s.div}</td><td><b>${s.cgpa}</b></td>
+          <td><span class="pill ${s.att>=75?'pill-green':'pill-red'}">${s.att}%</span></td>
+          <td><span class="pill ${s.fee==='Paid'?'pill-green':'pill-gold'}">${s.fee}</span></td>
+          <td style="display:flex;gap:6px">
+            <button class="btn-edit" onclick="toast('Editing ${s.name}')">Edit</button>
+            <button class="btn-danger" onclick="toast('Deleted ${s.name}')">Delete</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function adminFaculty(){
+  return `
+  <div class="page-header anim"><h2>🧑‍🏫 Faculty Management</h2></div>
+  <div class="card anim anim1">
+    <div class="card-head">
+      <div class="card-title">All Faculty</div>
+      <button class="btn-primary" onclick="toast('Add faculty form')">+ Add Faculty</button>
+    </div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Name</th><th>Subject</th><th>Experience</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>${DATA.faculty.map(f=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${f.id}</td>
+          <td>${f.name}</td>
+          <td><span class="pill pill-blue">${f.subject}</span></td>
+          <td>${f.exp}</td>
+          <td><span class="pill pill-green">${f.status}</span></td>
+          <td style="display:flex;gap:6px">
+            <button class="btn-edit" onclick="toast('Editing ${f.name}')">Edit</button>
+            <button class="btn-danger" onclick="toast('Deleted!')">Delete</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function adminSubjects(){
+  const subs = DATA.subjects.map((s,i)=>({
+    code:`CE-60${i+1}`,name:s,credits:4,
+    faculty:DATA.faculty[i]?.name||'TBD',sem:6,type:i%2===0?'Theory':'Theory+Practical'
+  }));
+  return `
+  <div class="page-header anim"><h2>📚 Subject Management</h2></div>
+  <div class="card anim anim1">
+    <div class="card-head">
+      <div class="card-title">Subjects – Sem VI</div>
+      <button class="btn-primary" onclick="toast('Add subject form')">+ Add Subject</button>
+    </div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Code</th><th>Subject</th><th>Credits</th><th>Faculty</th><th>Type</th><th>Actions</th></tr></thead>
+        <tbody>${subs.map(s=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${s.code}</td>
+          <td>${s.name}</td><td>${s.credits}</td><td>${s.faculty}</td>
+          <td><span class="pill pill-blue">${s.type}</span></td>
+          <td><button class="btn-edit" onclick="toast('Editing ${s.name}')">Edit</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function adminTimetable(){
+  const days = Object.keys(DATA.timetable);
+  const times = ['09:00–10:00','10:00–11:00','11:00–12:00','02:00–03:00','03:00–04:00'];
+  return `
+  <div class="page-header anim"><h2>🗓 Timetable Management</h2></div>
+  <div class="card anim anim1">
+    <div class="card-head">
+      <div class="card-title">CE Sem VI – Division Q</div>
+      <div style="display:flex;gap:8px">
+        <select style="padding:6px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:.8rem"><option>CE Sem VI Q</option><option>CE Sem VI R</option></select>
+        <button class="btn-primary" onclick="toast('Timetable saved!')">Save Changes</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="tt-grid">
+        <div></div>${days.map(d=>`<div class="tt-header" style="font-weight:800;color:var(--navy)">${d}</div>`).join('')}
+        ${times.map((t,i)=>`
+          <div class="tt-time">${t}</div>
+          ${days.map(d=>`<div class="tt-cell ${DATA.timetable[d][i]==='—'?'empty':''}">${DATA.timetable[d][i]}</div>`).join('')}
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function adminMarks(){
+  return `
+  <div class="page-header anim"><h2>📝 Marks & Results</h2></div>
+  <div class="stats-grid cols3 anim anim1">
+    ${stat('📊','7.8','Dept Avg SGPA','si-blue')}${stat('✅','94%','Pass Rate','si-green')}${stat('🏅','12','Distinctions','si-gold')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Results Summary – CE Sem VI</div><div class="card-action">Export PDF</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Roll No</th><th>Name</th><th>SGPA</th><th>Result</th><th>Class</th></tr></thead>
+        <tbody>${DATA.students.map(s=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${s.id}</td>
+          <td>${s.name}</td>
+          <td><b>${s.cgpa}</b></td>
+          <td><span class="pill ${s.cgpa>=4?'pill-green':'pill-red'}">${s.cgpa>=4?'Pass':'Fail'}</span></td>
+          <td><span class="pill ${s.cgpa>=9?'pill-purple':s.cgpa>=7?'pill-blue':s.cgpa>=6?'pill-gold':'pill-gray'}">${s.cgpa>=9?'Distinction':s.cgpa>=7?'First Class':s.cgpa>=6?'Second Class':'Pass'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function adminAttendance(){
+  return `
+  <div class="page-header anim"><h2>📊 Attendance Reports</h2></div>
+  <div class="stats-grid cols3 anim anim1">
+    ${stat('✅','84%','Dept Avg Attendance','si-green')}${stat('⚠️','14','Students Below 75%','si-red')}${stat('🔴','3','Detention Risk','si-red')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Subject-wise Attendance – CE Sem VI</div><div class="card-action">Export</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Subject</th><th>Faculty</th><th>Classes Held</th><th>Avg Attendance</th><th>Below 75%</th></tr></thead>
+        <tbody>${DATA.attendance.map((a,i)=>`<tr>
+          <td>${a.sub}</td>
+          <td>${DATA.faculty[i]?.name||'TBD'}</td>
+          <td>${a.held}</td>
+          <td><div class="prog-wrap"><div class="prog-bar"><div class="prog-fill ${a.pct>=75?'pf-green':'pf-red'}" data-w="${a.pct}" style="width:0"></div></div><div class="prog-val">${a.pct}%</div></div></td>
+          <td><span class="pill ${i===4?'pill-red':'pill-gold'}">${i===4?'8 students':'3 students'}</span></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function adminFee(){
+  return `
+  <div class="page-header anim"><h2>💰 Fee Management</h2></div>
+  <div class="stats-grid cols4 anim anim1">
+    ${stat('💰','₹8.4L','Total Collected','si-green')}${stat('⏳','₹1.2L','Pending','si-red')}${stat('✅','210','Paid Students','si-blue')}${stat('❌','30','Unpaid','si-gold')}
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Student Fee Status</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <thead><tr><th>Roll No</th><th>Name</th><th>Amount</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>${DATA.students.map(s=>`<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:.78rem">${s.id}</td>
+          <td>${s.name}</td>
+          <td>₹42,000</td>
+          <td>Jan 15, 2025</td>
+          <td><span class="pill ${s.fee==='Paid'?'pill-green':'pill-red'}">${s.fee}</span></td>
+          <td>${s.fee==='Pending'?`<button class="btn-primary" onclick="toast('Reminder sent!')">Send Reminder</button>`:`<button class="btn-success">Receipt</button>`}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function adminNotices(){
+  return `
+  <div class="page-header anim"><h2>💬 Notice Management</h2></div>
+  <div class="card anim anim1">
+    <div class="card-head"><div class="card-title">Post New Notice</div></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="f-group"><label>Title</label><input type="text" placeholder="Notice title"></div>
+        <div class="f-group"><label>Category</label><select><option>Exam</option><option>Event</option><option>Academic</option><option>General</option></select></div>
+      </div>
+      <div class="f-group" style="margin-bottom:12px"><label>Content</label><textarea rows="3" placeholder="Notice content..."></textarea></div>
+      <div class="form-row">
+        <div class="f-group"><label>Visible To</label><select><option>All</option><option>Students Only</option><option>Faculty Only</option></select></div>
+        <div class="f-group"><label>Priority</label><select><option>Normal</option><option>High</option><option>Urgent</option></select></div>
+      </div>
+      <button class="btn-primary" onclick="toast('Notice published!')">Publish Notice</button>
+    </div>
+  </div>
+  <div class="card anim anim2">
+    <div class="card-head"><div class="card-title">Published Notices</div></div>
+    <div class="card-body">
+      ${DATA.notices.map((n,i)=>`
+        <div class="notice-item">
+          <div class="n-dot" style="background:${{red:'#ef4444',orange:'#f97316',blue:'#2196f3',green:'#10b981',gray:'#94a3b8'}[n.type]}"></div>
+          <div style="flex:1"><div class="n-title">${n.title}</div><div class="n-meta">${n.from} · ${n.date}</div></div>
+          <button class="btn-danger" onclick="toast('Notice deleted')">Delete</button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function adminReports(){
+  return `
+  <div class="page-header anim"><h2>📋 Reports & Analytics</h2></div>
+  <div class="grid3 anim anim1">
+    <div class="card" style="cursor:pointer" onclick="toast('Generating report...')">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:2rem;margin-bottom:10px">📊</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy);margin-bottom:6px">Attendance Report</div>
+        <div style="font-size:.78rem;color:var(--muted)">Subject & student-wise attendance summary</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="toast('Generating report...')">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:2rem;margin-bottom:10px">🏆</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy);margin-bottom:6px">Results Report</div>
+        <div style="font-size:.78rem;color:var(--muted)">Semester result analysis and toppers list</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="toast('Generating report...')">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:2rem;margin-bottom:10px">💰</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy);margin-bottom:6px">Fee Report</div>
+        <div style="font-size:.78rem;color:var(--muted)">Collection status and pending dues</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="toast('Generating report...')">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:2rem;margin-bottom:10px">👥</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy);margin-bottom:6px">Student Report</div>
+        <div style="font-size:.78rem;color:var(--muted)">Enrollment, demographics, performance</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="toast('Generating report...')">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:2rem;margin-bottom:10px">🧑‍🏫</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy);margin-bottom:6px">Faculty Report</div>
+        <div style="font-size:.78rem;color:var(--muted)">Workload, marks upload, attendance marking</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer" onclick="toast('Generating report...')">
+      <div class="card-body" style="text-align:center;padding:28px 20px">
+        <div style="font-size:2rem;margin-bottom:10px">📅</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;color:var(--navy);margin-bottom:6px">Timetable Report</div>
+        <div style="font-size:.78rem;color:var(--muted)">Class utilization and scheduling overview</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ==================== HELPERS ==================== */
+function stat(icon,val,lbl,cls){
+  return `<div class="stat-card"><div class="stat-icon ${cls}">${icon}</div><div><div class="stat-val">${val}</div><div class="stat-lbl">${lbl}</div></div></div>`;
+}
+
+function ttRow(time,sub,room,pill){
+  return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);width:90px;flex-shrink:0">${time}</div>
+    <span class="pill ${pill}">${sub}</span>
+    <div style="font-size:.75rem;color:var(--muted);margin-left:auto">${room}</div>
+  </div>`;
+}
+
+function attRow(sub,pct,cls=''){
+  const c = pct>=75?(cls||'pf-green'):pct>=60?'pf-gold':'pf-red';
+  return `<div class="att-row">
+    <div class="att-sub">${sub}</div>
+    <div class="prog-bar"><div class="prog-fill ${c}" data-w="${pct}" style="width:0"></div></div>
+    <div class="att-pct">${pct}%</div>
+  </div>`;
+}
+
+function profileRow(label,val){
+  return `<div style="display:flex;padding:9px 0;border-bottom:1px solid var(--border);font-size:.83rem">
+    <div style="color:var(--muted);width:130px;flex-shrink:0">${label}</div>
+    <div style="font-weight:500;color:var(--navy)">${val}</div>
+  </div>`;
+}
+
+function showNotice(i){
+  const n = DATA.notices[i];
+  document.getElementById('modalTitle').textContent = n.title;
+  document.getElementById('modalBody').innerHTML = `
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px">${n.from} · ${n.date}</p>
+    <p style="font-size:.88rem;line-height:1.7;color:var(--ink)">${n.body}</p>
+  `;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function openAddStudentModal(){
+  document.getElementById('modalTitle').textContent = 'Add New Student';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="form-row"><div class="f-group"><label>Full Name</label><input type="text" placeholder="Student name"></div><div class="f-group"><label>Roll No</label><input type="text" placeholder="CE2025001"></div></div>
+    <div class="form-row"><div class="f-group"><label>Division</label><select><option>Q</option><option>R</option></select></div><div class="f-group"><label>Semester</label><select>${[1,2,3,4,5,6].map(s=>`<option>${s}</option>`).join('')}</select></div></div>
+    <div class="form-row"><div class="f-group"><label>Email</label><input type="email" placeholder="email@stu.edu"></div><div class="f-group"><label>Phone</label><input type="tel" placeholder="+91 XXXXX XXXXX"></div></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn-primary" onclick="toast('Student added!');closeModal()">Add Student</button>
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+</script>
+</body>
+</html>
